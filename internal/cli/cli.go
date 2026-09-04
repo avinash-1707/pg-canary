@@ -4,6 +4,9 @@ package cli
 import (
 	"fmt"
 	"io"
+	"strings"
+
+	"github.com/avinash-1707/pg-canary/internal/profile"
 )
 
 const usage = `pg-canary verifies configured PostgreSQL row-level-security invariants.
@@ -13,6 +16,7 @@ Usage:
 
 Commands:
   help    Show this help message
+  validate Validate a YAML profile without connecting to a database
 
 Run "pg-canary help" for usage information.
 `
@@ -23,6 +27,20 @@ func Run(args []string, stdout io.Writer) error {
 		_, err := fmt.Fprint(stdout, usage)
 		return err
 	}
+	if args[0] == "validate" {
+		return validate(args[1:], stdout)
+	}
 
 	return fmt.Errorf("pg-canary: unknown command %q (run \"pg-canary --help\" for usage)", args[0])
+}
+
+func validate(args []string, stdout io.Writer) error {
+	if len(args) != 2 || args[0] != "--profile" || strings.TrimSpace(args[1]) == "" {
+		return fmt.Errorf("usage: pg-canary validate --profile FILE")
+	}
+	if _, err := profile.LoadFile(args[1]); err != nil {
+		return err
+	}
+	_, err := fmt.Fprintln(stdout, "profile is valid")
+	return err
 }

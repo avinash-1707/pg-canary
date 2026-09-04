@@ -1,2 +1,2 @@
-// Package profile will load and validate versioned pg-canary YAML profiles.
+// Package profile loads and validates versioned pg-canary YAML profiles.
 package profile
