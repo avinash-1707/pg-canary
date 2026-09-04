@@ -1,0 +1,40 @@
+services:
+  postgres15:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: pg_canary_test
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pg_canary_test"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "5432"
+  postgres16:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: pg_canary_test
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pg_canary_test"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "5432"
+  postgres17:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: pg_canary_test
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pg_canary_test"]
+      interval: 1s
+      timeout: 5s
+      retries: 30
+    ports:
+      - "5432"

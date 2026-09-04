@@ -42,3 +42,6 @@ docs/                Product, architecture, and implementation notes
 The completed tool will require an explicit profile and write opt-in. It is
 not intended for production targets. See [docs/project-overview.md](docs/project-overview.md)
 for the product boundary and guarantees.
+
+The Docker-backed PostgreSQL 15, 16, and 17 fixture matrix is run with
+`make integration`; it requires a running Docker daemon.
