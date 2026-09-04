@@ -2,7 +2,9 @@ package profile
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/avinash-1707/pg-canary/internal/domain"
@@ -30,6 +32,8 @@ func Load(contents []byte) (domain.Profile, error) {
 	var extra any
 	if err := decoder.Decode(&extra); err == nil {
 		return domain.Profile{}, fmt.Errorf("decode profile: multiple YAML documents are not supported")
+	} else if !errors.Is(err, io.EOF) {
+		return domain.Profile{}, fmt.Errorf("decode profile: %w", err)
 	}
 	if err := Validate(result); err != nil {
 		return domain.Profile{}, err

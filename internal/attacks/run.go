@@ -21,11 +21,14 @@ func Run(ctx context.Context, tx pgx.Tx, schema string, attack domain.Attack, ro
 		e := domain.OperationEvidence{Table: attack.Table, Operation: op, DurationMS: 0}
 		switch op {
 		case domain.OperationSelect:
-			s, _ := sqlsafe.Select(schema, attack.Table, attack.PrimaryKey, row)
+			s, buildErr := sqlsafe.Select(schema, attack.Table, attack.PrimaryKey, row)
+			if buildErr != nil {
+				e.Error = buildErr.Error()
+				break
+			}
 			e.Template = s.Template
 			rows, err := tx.Query(ctx, s.SQL, s.Args...)
 			if err != nil {
-				e.Denied = true
 				e.Error = err.Error()
 			} else {
 				for rows.Next() {
@@ -35,11 +38,14 @@ func Run(ctx context.Context, tx pgx.Tx, schema string, attack domain.Attack, ro
 				e.Denied = e.RowsReturned == 0
 			}
 		case domain.OperationDelete:
-			s, _ := sqlsafe.Delete(schema, attack.Table, attack.PrimaryKey, row)
+			s, buildErr := sqlsafe.Delete(schema, attack.Table, attack.PrimaryKey, row)
+			if buildErr != nil {
+				e.Error = buildErr.Error()
+				break
+			}
 			e.Template = s.Template
 			tag, err := tx.Exec(ctx, s.SQL, s.Args...)
 			if err != nil {
-				e.Denied = true
 				e.Error = err.Error()
 			} else {
 				e.RowsAffected = tag.RowsAffected()
@@ -48,14 +54,12 @@ func Run(ctx context.Context, tx pgx.Tx, schema string, attack domain.Attack, ro
 		case domain.OperationUpdate:
 			s, err := sqlsafe.Update(schema, attack.Table, attack.PrimaryKey, row, attack.Mutation)
 			if err != nil {
-				e.Denied = true
 				e.Error = err.Error()
 				break
 			}
 			e.Template = s.Template
 			tag, err := tx.Exec(ctx, s.SQL, s.Args...)
 			if err != nil {
-				e.Denied = true
 				e.Error = err.Error()
 			} else {
 				e.RowsAffected = tag.RowsAffected()

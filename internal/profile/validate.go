@@ -57,9 +57,6 @@ func Validate(value domain.Profile) error {
 	}
 	validateIdentity(add, "identity.owner", value.Identity.Owner)
 	validateIdentity(add, "identity.adversary", value.Identity.Adversary)
-	if value.Identity.Owner.Role != "" && value.Identity.Owner.Role == value.Identity.Adversary.Role {
-		add("identity", "owner and adversary roles must differ")
-	}
 
 	fixturesByTable := make(map[string][]int)
 	for index, fixture := range value.Fixtures {

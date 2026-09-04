@@ -74,14 +74,11 @@ func Update(schema, table string, keys []string, values, mutation map[string]any
 	if e != nil {
 		return Statement{}, e
 	}
-	where, args, e := predicate(keys, values)
+	where, args, e := predicateOffset(keys, values, 2)
 	if e != nil {
 		return Statement{}, e
 	}
 	args = append([]any{value}, args...)
-	for n := range keys {
-		where = strings.Replace(where, fmt.Sprintf("$%d", n+1), fmt.Sprintf("$%d", n+2), 1)
-	}
 	sql := fmt.Sprintf("UPDATE %s SET %s = $1 WHERE %s", q, quoted, where)
 	return Statement{SQL: sql, Template: sql, Args: args}, nil
 }
@@ -112,6 +109,9 @@ func Insert(schema, table string, values map[string]any, columns []string) (Stat
 	return Statement{SQL: sql, Template: sql, Args: args}, nil
 }
 func predicate(keys []string, values map[string]any) (string, []any, error) {
+	return predicateOffset(keys, values, 1)
+}
+func predicateOffset(keys []string, values map[string]any, offset int) (string, []any, error) {
 	if len(keys) == 0 {
 		return "", nil, fmt.Errorf("primary key required")
 	}
@@ -126,7 +126,7 @@ func predicate(keys []string, values map[string]any) (string, []any, error) {
 		if !ok {
 			return "", nil, fmt.Errorf("missing primary-key value for %s", k)
 		}
-		parts[n] = fmt.Sprintf("%s = $%d", quoted, n+1)
+		parts[n] = fmt.Sprintf("%s = $%d", quoted, n+offset)
 		args[n] = v
 	}
 	return strings.Join(parts, " AND "), args, nil
