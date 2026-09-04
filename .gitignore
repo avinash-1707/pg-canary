@@ -1,0 +1,10 @@
+# Binaries and Go build artifacts
+/bin/
+*.test
+*.out
+
+# Local configuration and operating-system files
+.env
+.env.*
+!.env.example
+.DS_Store
