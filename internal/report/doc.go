@@ -1,2 +1,2 @@
-// Package report will render redacted terminal and JSON run reports.
+// Package report renders redacted terminal and JSON run reports.
 package report

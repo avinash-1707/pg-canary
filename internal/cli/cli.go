@@ -13,6 +13,7 @@ import (
 
 	"github.com/avinash-1707/pg-canary/internal/domain"
 	"github.com/avinash-1707/pg-canary/internal/profile"
+	"github.com/avinash-1707/pg-canary/internal/report"
 	"github.com/avinash-1707/pg-canary/internal/runner"
 )
 
@@ -175,15 +176,15 @@ func unavailableExecutor(ctx context.Context, profile domain.Profile, options Ru
 	return runner.Execute(ctx, profile, options.DatabaseURL)
 }
 
-func formatReport(report domain.Report, asJSON bool) ([]byte, error) {
+func formatReport(value domain.Report, asJSON bool) ([]byte, error) {
 	if asJSON {
-		encoded, err := json.MarshalIndent(report, "", "  ")
+		encoded, err := json.MarshalIndent(value, "", "  ")
 		if err != nil {
 			return nil, err
 		}
 		return append(encoded, '\n'), nil
 	}
-	return []byte(fmt.Sprintf("%s: %s\n", report.Outcome, report.Summary)), nil
+	return []byte(report.Terminal(value)), nil
 }
 
 func profileSensitiveValues(profileValue domain.Profile) []string {

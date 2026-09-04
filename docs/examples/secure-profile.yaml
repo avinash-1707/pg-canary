@@ -1,0 +1,30 @@
+version: 1
+database:
+  schema: secure
+  require_disposable: true
+identity:
+  owner:
+    role: canary_app
+    settings:
+      request.jwt.claim.sub: owner
+  adversary:
+    role: canary_app
+    settings:
+      request.jwt.claim.sub: attacker
+fixtures:
+  - table: projects
+    owner_row:
+      id: 1001
+      tenant_id: owner
+      name: canary-owner-project
+attacks:
+  - table: projects
+    primary_key: [id]
+    protected_columns: [tenant_id]
+    operations: [select, update, delete, insert]
+    mutation:
+      tenant_id: attacker
+    insert:
+      id: 1002
+      tenant_id: owner
+      name: canary-adversary-project

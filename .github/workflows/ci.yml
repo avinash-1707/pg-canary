@@ -15,5 +15,5 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - name: Verify format, unit tests, lint, and integration test scaffold
-        run: make ci
+      - name: Run release verification gate
+        run: make release-check

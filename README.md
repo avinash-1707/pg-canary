@@ -25,6 +25,10 @@ make build
 
 Run all CI checks locally with `make ci`.
 
+Before a release, run `make release-check`. See [docs/usage.md](docs/usage.md)
+for safety requirements, role provisioning, examples, and troubleshooting; see
+[docs/ci.md](docs/ci.md) for the release gate.
+
 ## Layout
 
 ```text
