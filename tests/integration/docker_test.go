@@ -113,6 +113,7 @@ func startPostgresStack(ctx context.Context) (*postgresStack, error) {
 		service string
 		major   int
 	}{
+		{service: "postgres14", major: 14},
 		{service: "postgres15", major: 15},
 		{service: "postgres16", major: 16},
 		{service: "postgres17", major: 17},

@@ -16,3 +16,7 @@ role, and recreates five purpose-built schemas:
 
 Run the matrix with `make integration`. The test creates a unique Compose
 project per process and removes all containers and volumes afterward.
+
+The Compose file also includes PostgreSQL 14 exclusively to prove that the
+dedicated connection rejects unsupported server versions; it is not a supported
+pg-canary target.

@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/avinash-1707/pg-canary/internal/database"
 	"github.com/avinash-1707/pg-canary/internal/domain"
 	"github.com/avinash-1707/pg-canary/internal/profile"
 )
@@ -170,8 +171,14 @@ func parseRunOptions(args []string) (RunOptions, error) {
 	return options, nil
 }
 
-func unavailableExecutor(_ context.Context, _ domain.Profile, _ RunOptions) (domain.Report, error) {
+func unavailableExecutor(_ context.Context, _ domain.Profile, options RunOptions) (domain.Report, error) {
+	connection, err := database.Open(context.Background(), database.Config{URL: options.DatabaseURL})
+	if err != nil {
+		return domain.Report{}, err
+	}
+	defer connection.Close(context.Background())
 	report := domain.NewReport(domain.OutcomeBlocked, "database execution is not available in this build")
+	report.Server = connection.Metadata
 	return report, nil
 }
 
