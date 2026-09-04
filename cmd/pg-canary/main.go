@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -11,6 +12,10 @@ import (
 func main() {
 	if err := cli.Run(os.Args[1:], os.Stdout); err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		var exitError cli.ExitError
+		if errors.As(err, &exitError) {
+			os.Exit(exitError.Code)
+		}
 		os.Exit(2)
 	}
 }

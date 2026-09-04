@@ -28,10 +28,14 @@ func (outcome Outcome) Valid() bool {
 
 // ExitCode maps an outcome to its CI process exit code.
 func (outcome Outcome) ExitCode() int {
-	if outcome == OutcomePass {
+	switch outcome {
+	case OutcomePass:
 		return 0
+	case OutcomeFail:
+		return 1
+	default:
+		return 2
 	}
-	return 1
 }
 
 // Database declares the database-level safety properties required by a profile.

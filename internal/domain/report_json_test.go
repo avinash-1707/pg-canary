@@ -52,9 +52,12 @@ func TestOutcomeExitCodes(t *testing.T) {
 	if OutcomePass.ExitCode() != 0 {
 		t.Fatal("pass must exit zero")
 	}
-	for _, outcome := range []Outcome{OutcomeFail, OutcomeInconclusive, OutcomeBlocked} {
-		if outcome.ExitCode() != 1 {
-			t.Fatalf("%s must fail CI", outcome)
+	if OutcomeFail.ExitCode() != 1 {
+		t.Fatal("fail must exit one")
+	}
+	for _, outcome := range []Outcome{OutcomeInconclusive, OutcomeBlocked} {
+		if outcome.ExitCode() != 2 {
+			t.Fatalf("%s must exit two", outcome)
 		}
 	}
 }
