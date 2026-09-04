@@ -2,9 +2,12 @@ package attacks
 
 import (
 	"context"
+	"errors"
 	"github.com/avinash-1707/pg-canary/internal/domain"
 	"github.com/avinash-1707/pg-canary/internal/sqlsafe"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"sort"
 	"time"
 )
 
@@ -63,4 +66,36 @@ func Run(ctx context.Context, tx pgx.Tx, schema string, attack domain.Attack, ro
 		out = append(out, e)
 	}
 	return out
+}
+
+func Insert(ctx context.Context, tx pgx.Tx, schema string, attack domain.Attack) domain.OperationEvidence {
+	evidence := domain.OperationEvidence{Table: attack.Table, Operation: domain.OperationInsert}
+	columns := make([]string, 0, len(attack.Insert))
+	for column := range attack.Insert {
+		columns = append(columns, column)
+	}
+	sort.Strings(columns)
+	statement, err := sqlsafe.Insert(schema, attack.Table, attack.Insert, columns)
+	if err != nil {
+		evidence.Error = err.Error()
+		return evidence
+	}
+	evidence.Template = statement.Template
+	started := time.Now()
+	tag, err := tx.Exec(ctx, statement.SQL, statement.Args...)
+	evidence.DurationMS = time.Since(started).Milliseconds()
+	if err == nil {
+		evidence.RowsAffected = tag.RowsAffected()
+		return evidence
+	}
+	evidence.Error = err.Error()
+	evidence.Denied = true
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		evidence.SQLState = pgErr.Code
+		if pgErr.Code != "42501" {
+			evidence.Denied = false
+		}
+	}
+	return evidence
 }
