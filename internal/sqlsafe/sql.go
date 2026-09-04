@@ -58,6 +58,33 @@ func Delete(schema, table string, keys []string, values map[string]any) (Stateme
 	sql := "DELETE FROM " + q + " WHERE " + where
 	return Statement{SQL: sql, Template: sql, Args: args}, nil
 }
+func Update(schema, table string, keys []string, values, mutation map[string]any) (Statement, error) {
+	q, e := Qualified(schema, table)
+	if e != nil {
+		return Statement{}, e
+	}
+	if len(mutation) != 1 {
+		return Statement{}, fmt.Errorf("update requires one mutation")
+	}
+	var column string
+	var value any
+	for column, value = range mutation {
+	}
+	quoted, e := Identifier(column)
+	if e != nil {
+		return Statement{}, e
+	}
+	where, args, e := predicate(keys, values)
+	if e != nil {
+		return Statement{}, e
+	}
+	args = append([]any{value}, args...)
+	for n := range keys {
+		where = strings.Replace(where, fmt.Sprintf("$%d", n+1), fmt.Sprintf("$%d", n+2), 1)
+	}
+	sql := fmt.Sprintf("UPDATE %s SET %s = $1 WHERE %s", q, quoted, where)
+	return Statement{SQL: sql, Template: sql, Args: args}, nil
+}
 func Insert(schema, table string, values map[string]any, columns []string) (Statement, error) {
 	q, e := Qualified(schema, table)
 	if e != nil {
