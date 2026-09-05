@@ -50,6 +50,16 @@ BEGIN
 END
 $$;
 
+CREATE FUNCTION secure.definer_project_count()
+RETURNS bigint
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = secure, pg_catalog
+AS $$ SELECT count(*) FROM secure.projects $$;
+ALTER FUNCTION secure.definer_project_count() OWNER TO canary_table_owner;
+REVOKE ALL ON FUNCTION secure.definer_project_count() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION secure.definer_project_count() TO canary_app;
+
 CREATE SCHEMA read_leak AUTHORIZATION canary_table_owner;
 CREATE TABLE read_leak.projects (
   id bigint PRIMARY KEY,
