@@ -200,6 +200,8 @@ GitHub Actions workflow under `.github/workflows/`.
 - The profile must explicitly provide fixtures, keys, and attack payloads.
 - v1 tests direct table access only. It does not test views, functions,
   PostgREST, application endpoints, HTTP adapters, or concurrency behavior.
+- Security-invoker view probing is available as a separately scoped access-path
+  component. See [docs/security-invoker-views.md](docs/security-invoker-views.md).
 - Catalog policy text is evidence, not a static proof of policy semantics.
 - External effects from triggers, rules, foreign tables, or called functions
   require special review before running the tool.

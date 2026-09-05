@@ -40,6 +40,15 @@ CREATE POLICY tenant_isolation ON secure.projects
   WITH CHECK (tenant_id = current_setting('request.jwt.claim.sub', true));
 GRANT USAGE ON SCHEMA secure TO canary_app;
 GRANT SELECT, INSERT, UPDATE, DELETE ON secure.projects TO canary_app;
+DO $$
+BEGIN
+  IF current_setting('server_version_num')::integer >= 150000 THEN
+    EXECUTE 'CREATE VIEW secure.projects_invoker WITH (security_invoker = true) AS SELECT id, tenant_id, name FROM secure.projects';
+    EXECUTE 'ALTER VIEW secure.projects_invoker OWNER TO canary_table_owner';
+    EXECUTE 'GRANT SELECT ON secure.projects_invoker TO canary_app';
+  END IF;
+END
+$$;
 
 CREATE SCHEMA read_leak AUTHORIZATION canary_table_owner;
 CREATE TABLE read_leak.projects (
