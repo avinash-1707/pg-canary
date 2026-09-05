@@ -53,8 +53,11 @@ ALTER TABLE read_leak.projects FORCE ROW LEVEL SECURITY;
 CREATE POLICY all_rows_visible ON read_leak.projects
   FOR SELECT TO canary_app
   USING (true);
+CREATE POLICY fixture_insert ON read_leak.projects
+  FOR INSERT TO canary_app
+  WITH CHECK (true);
 GRANT USAGE ON SCHEMA read_leak TO canary_app;
-GRANT SELECT ON read_leak.projects TO canary_app;
+GRANT SELECT, INSERT ON read_leak.projects TO canary_app;
 
 CREATE SCHEMA write_leak AUTHORIZATION canary_table_owner;
 CREATE TABLE write_leak.projects (

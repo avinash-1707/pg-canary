@@ -64,9 +64,31 @@ func Check(ctx context.Context, inspector catalog.Inspector, profile domain.Prof
 				add("external_effect_acknowledgement_required", domain.SeverityBlocking, attack.Table, "triggers or rules require explicit acknowledgement")
 			}
 		}
-		if len(t.Grants) == 0 {
-			add("missing_privileges", domain.SeverityInconclusive, attack.Table, "table has no inspectable grants")
+		for _, requirement := range requiredPrivileges(attack, profile.Identity.Owner.Role, profile.Identity.Adversary.Role) {
+			allowed, privilegeErr := inspector.HasTablePrivilege(ctx, requirement.role, profile.Database.Schema, attack.Table, requirement.privilege)
+			if privilegeErr != nil || !allowed {
+				add("missing_privilege", domain.SeverityInconclusive, attack.Table, requirement.role+" lacks "+requirement.privilege+" privilege")
+			}
 		}
 	}
 	return r
+}
+
+type privilegeRequirement struct{ role, privilege string }
+
+func requiredPrivileges(attack domain.Attack, ownerRole, adversaryRole string) []privilegeRequirement {
+	requirements := []privilegeRequirement{{role: ownerRole, privilege: "INSERT"}, {role: ownerRole, privilege: "SELECT"}}
+	for _, operation := range attack.Operations {
+		switch operation {
+		case domain.OperationSelect:
+			requirements = append(requirements, privilegeRequirement{role: adversaryRole, privilege: "SELECT"})
+		case domain.OperationUpdate:
+			requirements = append(requirements, privilegeRequirement{role: adversaryRole, privilege: "UPDATE"})
+		case domain.OperationDelete:
+			requirements = append(requirements, privilegeRequirement{role: adversaryRole, privilege: "DELETE"})
+		case domain.OperationInsert:
+			requirements = append(requirements, privilegeRequirement{role: adversaryRole, privilege: "INSERT"})
+		}
+	}
+	return requirements
 }

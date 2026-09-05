@@ -192,3 +192,14 @@ func (i Inspector) Memberships(ctx context.Context, member string) ([]Membership
 	}
 	return result, rows.Err()
 }
+
+// HasTablePrivilege asks PostgreSQL for the effective privilege of role.
+func (i Inspector) HasTablePrivilege(ctx context.Context, role, schema, table, privilege string) (bool, error) {
+	var allowed bool
+	err := i.conn.QueryRow(ctx, `
+SELECT has_table_privilege(
+  (SELECT oid FROM pg_roles WHERE rolname = $1),
+  (SELECT c.oid FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = $2 AND c.relname = $3),
+  $4)`, role, schema, table, privilege).Scan(&allowed)
+	return allowed, err
+}
